@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(){
+  float slbase = 0;
+  int grau = 0;
+  int temposerv = 0;
+
+  printf("Digite o salario base: \n");
+  scanf("%f", &slbase);
+
+  if (slbase < 1412){
+    printf("Seu salário é irreal para com a Constituição Brasileira.");
+    exit(1);
+  }
+
+  printf("Qual seu grau de graduação?\nDigite: 1 = Doutor, 2 = Mestre ou 3 = Especialista.\n");
+  scanf("%i", &grau);
+
+  printf("Qual seu tempo de serviço na empresa em que trabalha atualmente? (em anos)\n");
+  scanf("%i", &temposerv);
+
+  float bonus = 0; 
+  
+  if (temposerv <= 5) {
+    bonus = slbase * (temposerv/100);
+  } 
+  else {
+    bonus = 0.05 * slbase;
+  }
+
+  if (grau == 1){
+    slbase *= 1.6;
+  } else if (grau == 2){
+    slbase *= 1.4;
+  } else if (grau == 3){
+    slbase *= 1.2;
+  } else {
+    slbase = slbase;
+  }
+
+  slbase = slbase + bonus;
+  
+  float slbruto = 0;
+  slbruto = slbase + 440;
+
+  printf("O salario é: %f \n", slbase);
+  printf("O salario bruto (com auxílio alimentação) é: %f \n", slbruto);
+
+  float slbase1 = slbase;
+  float liquido = slbase;
+  if (slbase >= 2824) {
+
+    slbase = slbase * 0.275;
+  }
+  else (slbase = slbase);
+  slbase1 = slbase1 * 0.15;
+
+  
+  
+  printf("O total de descontos é: %f \n", slbase + slbase1);
+  printf("O salário líquido é: %f", (liquido + 440) - (slbase + slbase1));
+  return 0;
+}
