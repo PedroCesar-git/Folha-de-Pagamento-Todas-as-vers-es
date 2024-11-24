@@ -1,0 +1,159 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void entradaAuxiliosEmpregado(float *AuxAlimentacao, float *AuxTransporte, float *AuxCreche, float *AuxEscola, float *AuxSaude, float *SegVida) {
+    printf("Qual valor do seu Auxílio Alimentação?\n");
+    scanf("%f", AuxAlimentacao);
+    printf("Qual valor do seu Auxílio Transporte?\n");
+    scanf("%f", AuxTransporte);
+    printf("Qual valor do seu Auxílio Creche?\n");
+    scanf("%f", AuxCreche);
+    printf("Qual valor do seu Auxílio Escola?\n");
+    scanf("%f", AuxEscola);
+    printf("Qual valor do seu Auxílio Saúde?\n");
+    scanf("%f", AuxSaude);
+    printf("Qual valor do seu Seguro de Vida?\n");
+    scanf("%f", SegVida);
+}
+
+float calcularSalarioEmpregado(float salBase, int horaExtra, float AuxAlimentacao, float AuxTransporte, float AuxCreche, float AuxEscola, float AuxSaude, float SegVida, float *descontoINSS, float *descontoIRRF, float *fgts, float *taxasindical) {
+    float valorHoraExtra = (salBase / 220) * 1.5;
+    float salBruto = salBase + (horaExtra * valorHoraExtra) + AuxAlimentacao + AuxTransporte + AuxCreche + AuxEscola + AuxSaude + SegVida;
+
+    // calculo do INSS
+    if (salBase <= 1750.00) {
+        *descontoINSS = salBase * 0.075;
+    } else if (salBase <= 2919.72) {
+        *descontoINSS = salBase * 0.09;
+    } else if (salBase <= 5839.45) {
+        *descontoINSS = salBase * 0.12;
+    } else {
+        *descontoINSS = salBase * 0.14;
+    }
+
+    // calculo do IRRF
+    float salBaseDescontos = salBase - *descontoINSS;
+    if (salBaseDescontos <= 1903.98) {
+        *descontoIRRF = 0;
+    } else if (salBaseDescontos <= 2826.65) {
+        *descontoIRRF = (salBaseDescontos * 0.075) - 142.80;
+    } else if (salBaseDescontos <= 3751.05) {
+        *descontoIRRF = (salBaseDescontos * 0.15) - 354.80;
+    } else if (salBaseDescontos <= 4664.68) {
+        *descontoIRRF = (salBaseDescontos * 0.225) - 636.13;
+    } else {
+        *descontoIRRF = (salBaseDescontos * 0.275) - 869.36;
+    }
+
+    *fgts = salBruto * 0.08;
+    *taxasindical = salBase * 0.03;
+    return salBruto - *descontoINSS - *descontoIRRF - *taxasindical;
+}
+
+void calcularSalarioEmpresario() {
+    float sBase, aliquota, totalSoma = 0;
+    printf("Qual o valor da receita da sua empresa?\n");
+    scanf(" %f", &sBase);
+
+    // calculo dos impostos
+    float IRPJ = (sBase > 20000) ? sBase * 0.2 : sBase * 0.15;
+    float CSLL = sBase * 0.09;
+    float IPI = sBase * 0.075;
+
+    printf("Qual é a alíquota do produto que sua empresa comercializa?\n");
+    scanf("%f", &aliquota);
+
+    float ICMS = (aliquota == 0) ? 0 : sBase * (aliquota / 100);
+    float COFINSPIS = sBase * 0.0365;
+
+    // gastos com sistemas
+    float sistemas;
+    printf("Se sua empresa utiliza sistemas pagos, qual o valor deles?\n");
+    scanf(" %f", &sistemas);
+
+    float taxasSistemas = IRPJ + CSLL + IPI + ICMS + COFINSPIS + sistemas;
+
+    // calculo do salários dos funcionários
+    int funcionarios;
+    printf("Quantos funcionários sua empresa tem?\n");
+    scanf("%d", &funcionarios);
+
+    float totalImpostosFuncionarios = 0;
+
+    for (int i = funcionarios; i > 0; i--) {
+        float sPagar, gratTempoServico, gratFerias, INSS, FGTSplus, auxTransporte, reservaFerias, decimoTerceiro, soma;
+        printf("Qual o valor do salário do funcionário %i?\n", i);
+        scanf(" %f", &sPagar);
+
+        printf("Qual a bonificação em porcentagem por tempo de serviço do funcionário %i?\n", i);
+        scanf(" %f", &gratTempoServico);
+
+        gratFerias = sPagar * 0.33;
+        gratTempoServico = sPagar * (gratTempoServico / 100);
+
+        printf("Qual o valor do auxílio transporte do funcionário %i?\n", i);
+        scanf("%f", &auxTransporte);
+
+        INSS = sPagar * 0.2;
+        FGTSplus = sPagar * 0.08;
+        reservaFerias = (sPagar * 1.33) / 12;
+        decimoTerceiro = sPagar / 12;
+
+        soma = sPagar + gratFerias + gratTempoServico + auxTransporte + INSS + FGTSplus + reservaFerias + decimoTerceiro;
+        totalSoma += soma;
+
+        totalImpostosFuncionarios += INSS + FGTSplus;
+    }
+
+    printf("Gastos com funcionários: %.2f\n", totalSoma);
+    printf("Impostos pagos para funcionários: %.2f\n", totalImpostosFuncionarios);
+    printf("Impostos + Gastos com Sistemas: R$ %.2f\n", taxasSistemas);
+    printf("Total de Gastos da empresa: %.2f\n", totalSoma + taxasSistemas);
+    printf("Renda líquida: %.2f\n", sBase - totalSoma - taxasSistemas);
+}
+
+int main(void) {
+    char tecla; 
+    printf("\033[3mCalculadora de Folha de Pagamento v3.0\033[0m\n\n");
+    printf("**************************************\n\n");
+
+    while (1) {  
+        printf("Você é um trabalhador empregado ou empresário?\n");
+        printf("Digite: 0 = empregado; 1 = empresário\n");
+        printf("Pressione 'Esc' para sair.\n");
+
+        scanf(" %c", &tecla);
+
+        if (tecla == 27) {
+            printf("Programa interrompido pelo usuário.\n");
+            break;
+        } else if (tecla == '0') {
+            float AuxAlimentacao, AuxTransporte, AuxCreche, AuxEscola, AuxSaude, SegVida;
+            float salBase, descontoINSS, descontoIRRF, fgts, taxasindical, salLiquido;
+            int horaExtra;
+
+            entradaAuxiliosEmpregado(&AuxAlimentacao, &AuxTransporte, &AuxCreche, &AuxEscola, &AuxSaude, &SegVida);
+
+            printf("Digite o salário base: \n");
+            scanf("%f", &salBase);
+            if (salBase < 1412.00) {
+                printf("Seu salário é irreal para com a Constituição Brasileira.\n");
+                exit(1);
+            }
+
+            printf("Quantas horas extras você trabalhou no mês?\n");
+            scanf("%d", &horaExtra);
+
+            salLiquido = calcularSalarioEmpregado(salBase, horaExtra, AuxAlimentacao, AuxTransporte, AuxCreche, AuxEscola, AuxSaude, SegVida, &descontoINSS, &descontoIRRF, &fgts, &taxasindical);
+
+            printf("Salário Líquido: R$ %.2f\n", salLiquido);
+            printf("Total de impostos pagos: R$ %.2f\n", descontoINSS + descontoIRRF + taxasindical);
+        } else if (tecla == '1') {
+            calcularSalarioEmpresario();
+        } else {
+            printf("Entrada inválida. Tente novamente.\n");
+        }
+    }
+
+    return 0;
+}
